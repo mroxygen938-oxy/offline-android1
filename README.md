@@ -60,8 +60,8 @@ src/
     lists.js              # Anime + manga list definitions
     native.js             # Capacitor detection helper
     storage.js            # useLocalStorage hook
-android/                  # Capacitor Android project
-electron/
+android/                  # Capacitor Android project (APK / AAB)
+windows/                  # Electron wrapper for Windows .exe
   main.cjs                # Electron main process (window, IPC, dialogs)
   preload.cjs             # Sandboxed bridge → window.oxygenElectron
 build/

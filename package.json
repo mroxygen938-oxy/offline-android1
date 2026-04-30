@@ -3,7 +3,7 @@
   "private": true,
   "version": "1.0.0",
   "type": "module",
-  "main": "electron/main.cjs",
+  "main": "windows/main.cjs",
   "description": "Offline anime + manga tracker — Android APK and Windows EXE build from the same React UI.",
   "author": "OxygenVault",
   "scripts": {
@@ -52,7 +52,7 @@
     },
     "files": [
       "dist/**/*",
-      "electron/**/*",
+      "windows/**/*",
       "package.json"
     ],
     "win": {
