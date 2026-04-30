@@ -11,6 +11,12 @@ import { isNative } from './native.js'
 
 const BACKUP_VERSION = 1
 
+/* Electron (Windows/macOS/Linux desktop) exposes a small bridge via
+   preload; the renderer is sandboxed so we can't touch the filesystem
+   directly. */
+const isElectron = () =>
+  typeof window !== 'undefined' && Boolean(window.oxygenElectron)
+
 function buildPayload({ animes, mangas }) {
   return JSON.stringify(
     {
@@ -37,6 +43,12 @@ function timestampedFilename() {
 export async function exportLibrary({ animes, mangas }) {
   const json = buildPayload({ animes, mangas })
   const filename = timestampedFilename()
+
+  if (isElectron()) {
+    const res = await window.oxygenElectron.exportBackup(json)
+    if (res?.canceled) return { canceled: true }
+    return { filePath: res?.filePath, filename }
+  }
 
   if (isNative()) {
     /* On Android, write to the app's Documents folder via the
@@ -89,9 +101,7 @@ export async function exportLibrary({ animes, mangas }) {
   return { filename }
 }
 
-export async function importLibrary(file) {
-  if (!file) throw new Error('No file selected')
-  const text = await file.text()
+function parseBackupText(text) {
   let parsed
   try {
     parsed = JSON.parse(text)
@@ -108,4 +118,18 @@ export async function importLibrary(file) {
     animes: Array.isArray(parsed.animes) ? parsed.animes : [],
     mangas: Array.isArray(parsed.mangas) ? parsed.mangas : [],
   }
+}
+
+/* Called with no args on Electron (we open our own dialog); called
+   with a File on the web + Android (the renderer already picked one
+   via <input type=file>). */
+export async function importLibrary(file) {
+  if (isElectron() && !file) {
+    const res = await window.oxygenElectron.importBackup()
+    if (res?.canceled) return { canceled: true }
+    return parseBackupText(res.content)
+  }
+  if (!file) throw new Error('No file selected')
+  const text = await file.text()
+  return parseBackupText(text)
 }

@@ -461,6 +461,7 @@ function Vault() {
     async (file) => {
       try {
         const data = await importLibrary(file)
+        if (data?.canceled) return
         if (Array.isArray(data.animes)) setAnimes(data.animes)
         if (Array.isArray(data.mangas)) setMangas(data.mangas)
         toast('Backup imported')

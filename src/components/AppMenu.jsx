@@ -23,9 +23,18 @@ export default function AppMenu({ onExport, onImport, theme, onTheme }) {
     }
   }, [open])
 
+  const hasElectron =
+    typeof window !== 'undefined' && Boolean(window.oxygenElectron)
+
   const triggerImport = () => {
     setOpen(false)
-    fileRef.current?.click()
+    if (hasElectron) {
+      /* Electron: skip the hidden <input>, let the main process show a
+         native Open dialog instead — works correctly on Windows. */
+      onImport(null)
+    } else {
+      fileRef.current?.click()
+    }
   }
 
   const onFile = (e) => {
