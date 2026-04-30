@@ -2728,17 +2728,32 @@ html[data-theme='light'] .btn-ghost:hover {
 .user-chip {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
-  padding: 4px 10px 4px 4px;
+  padding: 0;
   border: 1px solid var(--glass-border);
   background: var(--glass-inner);
   border-radius: 999px;
   cursor: pointer;
   color: var(--fg-1);
-  line-height: 1;
+  line-height: 0;
+  width: 40px;
   height: 40px;
   transition: background 0.18s var(--ease), border-color 0.18s var(--ease),
     transform 0.18s var(--ease);
+}
+
+.user-chip-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  line-height: 0;
+}
+
+.user-chip-avatar > svg {
+  display: block;
 }
 
 .user-chip:hover {
