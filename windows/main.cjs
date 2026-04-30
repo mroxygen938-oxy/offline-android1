@@ -5,11 +5,24 @@
    app's own asar archive and user data lives in
    %APPDATA%\Oxygen Vault Offline\. */
 
-const { app, BrowserWindow, ipcMain, dialog, shell, Menu } = require('electron')
+const {
+  app,
+  BrowserWindow,
+  ipcMain,
+  dialog,
+  shell,
+  Menu,
+  nativeTheme,
+} = require('electron')
 const path = require('path')
 const fs = require('fs/promises')
 
 const isDev = !app.isPackaged
+
+/* Force the OS-drawn title bar into dark mode regardless of the user's
+   Windows theme — our app is dark. Must be set before the first
+   BrowserWindow is created. */
+nativeTheme.themeSource = 'dark'
 
 let mainWindow = null
 

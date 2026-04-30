@@ -1,8 +1,10 @@
 using System;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Interop;
 using Microsoft.Web.WebView2.Core;
 using Microsoft.Win32;
 
@@ -19,7 +21,44 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
+        SourceInitialized += OnSourceInitialized;
         Loaded += OnLoaded;
+    }
+
+    /* -------------------- Dark title bar -------------------- */
+
+    private const int DWMWA_USE_IMMERSIVE_DARK_MODE = 20;
+    private const int DWMWA_USE_IMMERSIVE_DARK_MODE_PRE_20H1 = 19;
+    private const int DWMWA_CAPTION_COLOR = 35;
+    private const int DWMWA_BORDER_COLOR = 34;
+
+    [DllImport("dwmapi.dll", PreserveSig = true)]
+    private static extern int DwmSetWindowAttribute(
+        IntPtr hwnd, int attr, ref int attrValue, int attrSize);
+
+    private void OnSourceInitialized(object? sender, EventArgs e)
+    {
+        /* Ask the DWM to draw the title bar + border in dark mode. Works
+           on Windows 10 2004+ and Windows 11. Silently no-ops on older
+           builds. */
+        var hwnd = new WindowInteropHelper(this).EnsureHandle();
+        int useDark = 1;
+        if (DwmSetWindowAttribute(hwnd, DWMWA_USE_IMMERSIVE_DARK_MODE,
+                ref useDark, sizeof(int)) != 0)
+        {
+            DwmSetWindowAttribute(hwnd, DWMWA_USE_IMMERSIVE_DARK_MODE_PRE_20H1,
+                ref useDark, sizeof(int));
+        }
+
+        /* On Windows 11 22H2+, explicitly paint the caption + border to
+           match the React background (#0E0B1F). 0x001F0B0E is the BGR
+           value. Gracefully ignored on older Windows builds that don't
+           support these DWMWA_ values. */
+        int captionColor = 0x001F0B0E;
+        DwmSetWindowAttribute(hwnd, DWMWA_CAPTION_COLOR,
+            ref captionColor, sizeof(int));
+        DwmSetWindowAttribute(hwnd, DWMWA_BORDER_COLOR,
+            ref captionColor, sizeof(int));
     }
 
     private async void OnLoaded(object sender, RoutedEventArgs e)
