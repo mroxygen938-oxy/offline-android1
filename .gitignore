@@ -34,3 +34,8 @@ android/capacitor-cordova-android-plugins/
 # Electron-builder output
 release/
 
+# .NET build output (windows-native/)
+windows-native/bin/
+windows-native/obj/
+windows-native/web/
+

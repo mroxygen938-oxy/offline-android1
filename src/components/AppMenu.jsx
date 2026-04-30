@@ -23,14 +23,15 @@ export default function AppMenu({ onExport, onImport, theme, onTheme }) {
     }
   }, [open])
 
-  const hasElectron =
-    typeof window !== 'undefined' && Boolean(window.oxygenElectron)
+  const hasDesktopBridge =
+    typeof window !== 'undefined' &&
+    Boolean(window.oxygenElectron || window.oxygenNative)
 
   const triggerImport = () => {
     setOpen(false)
-    if (hasElectron) {
-      /* Electron: skip the hidden <input>, let the main process show a
-         native Open dialog instead — works correctly on Windows. */
+    if (hasDesktopBridge) {
+      /* Desktop hosts (Electron or WPF/WebView2): skip the hidden
+         <input> and let the host show a real Open dialog. */
       onImport(null)
     } else {
       fileRef.current?.click()

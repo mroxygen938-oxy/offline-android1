@@ -17,6 +17,16 @@ const BACKUP_VERSION = 1
 const isElectron = () =>
   typeof window !== 'undefined' && Boolean(window.oxygenElectron)
 
+/* Native Windows host (C# WPF + WebView2) exposes the same API under
+   `window.oxygenNative` via a shim injected by the C# side. */
+const isWin32Native = () =>
+  typeof window !== 'undefined' && Boolean(window.oxygenNative)
+
+const desktopBridge = () =>
+  (typeof window === 'undefined'
+    ? null
+    : window.oxygenElectron || window.oxygenNative || null)
+
 function buildPayload({ animes, mangas }) {
   return JSON.stringify(
     {
@@ -44,8 +54,9 @@ export async function exportLibrary({ animes, mangas }) {
   const json = buildPayload({ animes, mangas })
   const filename = timestampedFilename()
 
-  if (isElectron()) {
-    const res = await window.oxygenElectron.exportBackup(json)
+  const bridge = desktopBridge()
+  if (bridge) {
+    const res = await bridge.exportBackup(json)
     if (res?.canceled) return { canceled: true }
     return { filePath: res?.filePath, filename }
   }
@@ -124,8 +135,9 @@ function parseBackupText(text) {
    with a File on the web + Android (the renderer already picked one
    via <input type=file>). */
 export async function importLibrary(file) {
-  if (isElectron() && !file) {
-    const res = await window.oxygenElectron.importBackup()
+  const bridge = desktopBridge()
+  if (bridge && !file) {
+    const res = await bridge.importBackup()
     if (res?.canceled) return { canceled: true }
     return parseBackupText(res.content)
   }
@@ -133,3 +145,8 @@ export async function importLibrary(file) {
   const text = await file.text()
   return parseBackupText(text)
 }
+
+/* Re-exported for components that need to pick the right import flow
+   (Electron or WPF/WebView2 both skip the hidden <input> and let the
+   host show a real Open dialog). */
+export { isElectron, isWin32Native }
