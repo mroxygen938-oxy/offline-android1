@@ -514,12 +514,16 @@ function Vault() {
       targetSetter((prev) => {
         const existing = prev.find((x) => x.anilistId === item.anilistId)
         if (existing) return prev
+        /* Prefer the offline base64 copy. If that download failed
+           (rare — flaky network at import time), fall back to the
+           remote URL so the card still renders when online. */
+        const offlineCover = coverDataUrl || ''
         const entry = {
           id: uid(),
           anilistId: item.anilistId,
           malId: item.malId || null,
           title: item.title,
-          image: coverDataUrl || '',
+          image: offlineCover || item.cover || '',
           imageRemote: item.cover || '',
           list: targetList,
           totalEpisodes: Number(totalKey) || 0,
