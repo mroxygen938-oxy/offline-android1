@@ -3238,6 +3238,10 @@ html[data-theme='light'] .btn-ghost:hover {
   flex: 0 0 auto;
 }
 
+.discover-sheet-banner-empty {
+  background: linear-gradient(135deg, rgba(124, 92, 255, 0.32), rgba(58, 28, 113, 0.5));
+}
+
 .discover-sheet-banner::after {
   content: '';
   position: absolute;
@@ -3261,15 +3265,17 @@ html[data-theme='light'] .btn-ghost:hover {
 }
 
 .discover-sheet-cover {
-  flex: 0 0 130px;
-  width: 130px;
+  flex: 0 0 140px;
+  width: 140px;
   aspect-ratio: 2 / 3;
   border-radius: 14px;
   overflow: hidden;
   background: rgba(255, 255, 255, 0.05);
-  margin-top: -50px;
-  border: 2px solid rgba(255, 255, 255, 0.08);
+  margin-top: -70px;
+  border: 2px solid rgba(255, 255, 255, 0.1);
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+  position: relative;
+  z-index: 2;
 }
 
 .discover-sheet-cover img {
@@ -3365,8 +3371,9 @@ html[data-theme='light'] .btn-ghost:hover {
     padding: 14px 16px 18px;
   }
   .discover-sheet-cover {
-    margin: -60px auto 0;
+    margin: -80px auto 0;
     flex: 0 0 auto;
+    width: 130px;
   }
   .discover-sheet-banner { height: 120px; }
   .discover-grid {
