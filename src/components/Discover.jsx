@@ -312,11 +312,11 @@ function PreviewSheet({ item, imported, importing, onClose, onImport }) {
           <IconX />
         </button>
 
-        {item.banner && (
-          <div className="discover-sheet-banner">
-            <img src={item.banner} alt="" />
-          </div>
-        )}
+        <div
+          className={`discover-sheet-banner${item.banner ? '' : ' discover-sheet-banner-empty'}`}
+        >
+          {item.banner && <img src={item.banner} alt="" />}
+        </div>
 
         <div className="discover-sheet-body">
           <div className="discover-sheet-cover">
