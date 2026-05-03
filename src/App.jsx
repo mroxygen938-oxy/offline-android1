@@ -4,6 +4,7 @@ import AnimeCard from './components/AnimeCard.jsx'
 import AnimeModal from './components/AnimeModal.jsx'
 import MovePopover from './components/MovePopover.jsx'
 import AppMenu from './components/AppMenu.jsx'
+import Discover from './components/Discover.jsx'
 import {
   getListById,
   getListIds,
@@ -23,6 +24,7 @@ const KEY_LIST_ANIME = 'oxygen-vault-offline/active-list-anime'
 const KEY_LIST_MANGA = 'oxygen-vault-offline/active-list-manga'
 const KEY_MODE = 'oxygen-vault-offline/media-mode'
 const KEY_THEME = 'oxygen-vault-offline/theme'
+const KEY_VIEW = 'oxygen-vault-offline/view'
 
 const SAMPLE_ANIME = () => [
   {
@@ -141,6 +143,7 @@ export default function App() {
 function Vault() {
   const [theme, setTheme] = useLocalStorage(KEY_THEME, 'dark')
   const [mediaMode, setMediaMode] = useLocalStorage(KEY_MODE, 'anime')
+  const [view, setView] = useLocalStorage(KEY_VIEW, 'library')
   const [animes, setAnimes] = useLocalStorage(KEY_ANIME, SAMPLE_ANIME)
   const [mangas, setMangas] = useLocalStorage(KEY_MANGA, SAMPLE_MANGA)
   const [activeListAnime, setActiveListAnime] = useLocalStorage(
@@ -488,6 +491,73 @@ function Vault() {
     [setMediaMode]
   )
 
+  const onSelectView = useCallback(
+    (next) => {
+      setView(next)
+      setMobileNavOpen(false)
+    },
+    [setView]
+  )
+
+  /* Set of AniList IDs already imported — used by Discover to mark
+     cards as 'In library' and prevent duplicate imports. */
+  const importedAnilistIds = useMemo(() => {
+    const all = mediaMode === 'manga' ? mangas : animes
+    return all.map((x) => x.anilistId).filter(Boolean)
+  }, [animes, mangas, mediaMode])
+
+  const importFromAniList = useCallback(
+    async (item, coverDataUrl) => {
+      const targetMode = item.type === 'manga' ? 'manga' : 'anime'
+      const targetSetter = targetMode === 'manga' ? setMangas : setAnimes
+      const targetList = targetMode === 'manga' ? 'planToRead' : 'planToWatch'
+      const totalKey = targetMode === 'manga' ? item.chapters : item.episodes
+      targetSetter((prev) => {
+        const existing = prev.find((x) => x.anilistId === item.anilistId)
+        if (existing) return prev
+        /* Prefer the offline base64 copy. If that download failed
+           (rare — flaky network at import time), fall back to the
+           remote URL so the card still renders when online. */
+        const offlineCover = coverDataUrl || ''
+        const entry = {
+          id: uid(),
+          anilistId: item.anilistId,
+          malId: item.malId || null,
+          title: item.title,
+          image: offlineCover || item.cover || '',
+          imageRemote: item.cover || '',
+          list: targetList,
+          totalEpisodes: Number(totalKey) || 0,
+          watchedEpisodes: 0,
+          year: item.year ? String(item.year) : '',
+          studio: item.studio || '',
+          rating: 0,
+          notes: item.description ? item.description.slice(0, 400) : '',
+          genres: item.genres || [],
+          score: item.score || 0,
+          format: item.format || '',
+          status: item.status || '',
+          season: item.season || '',
+          createdAt: Date.now(),
+        }
+        return [entry, ...prev]
+      })
+      if (mediaMode !== targetMode) setMediaMode(targetMode)
+      setActiveListAnime((id) => (targetMode === 'anime' ? targetList : id))
+      setActiveListManga((id) => (targetMode === 'manga' ? targetList : id))
+      toast(`Added “${item.title}” to your library`)
+    },
+    [
+      mediaMode,
+      setMangas,
+      setAnimes,
+      setMediaMode,
+      setActiveListAnime,
+      setActiveListManga,
+      toast,
+    ]
+  )
+
   const filteredCount = filtered.length
   const totalForActive =
     activeList === 'all' ? items.length : counts[activeList] ?? 0
@@ -509,7 +579,10 @@ function Vault() {
           onChangeMode={onChangeMode}
           lists={lists}
           activeList={activeList}
-          onSelect={onSelectList}
+          onSelect={(id) => {
+            if (view !== 'library') setView('library')
+            onSelectList(id)
+          }}
           counts={counts}
           theme={theme}
           onTheme={setTheme}
@@ -517,6 +590,8 @@ function Vault() {
           allLabel={config.allLabel}
           sectionTitle={config.sectionTitle}
           onClose={() => setMobileNavOpen(false)}
+          view={view}
+          onSelectView={onSelectView}
         />
       </div>
 
@@ -531,49 +606,55 @@ function Vault() {
           >
             {mobileNavOpen ? <IconX /> : <IconMenu />}
           </button>
-          <div className="search">
-            <IconSearch />
-            <input
-              ref={searchRef}
-              type="search"
-              placeholder={config.searchPlaceholder}
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              aria-label="Search library"
-              enterKeyHint="search"
-              autoCapitalize="off"
-              autoCorrect="off"
-              spellCheck="false"
-            />
-            {isSearching && (
-              <span className="search-count" aria-live="polite">
-                {filteredCount}
-              </span>
-            )}
-            {query && (
+          {view === 'library' ? (
+            <>
+              <div className="search">
+                <IconSearch />
+                <input
+                  ref={searchRef}
+                  type="search"
+                  placeholder={config.searchPlaceholder}
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  aria-label="Search library"
+                  enterKeyHint="search"
+                  autoCapitalize="off"
+                  autoCorrect="off"
+                  spellCheck="false"
+                />
+                {isSearching && (
+                  <span className="search-count" aria-live="polite">
+                    {filteredCount}
+                  </span>
+                )}
+                {query && (
+                  <button
+                    type="button"
+                    className="search-clear"
+                    onClick={() => {
+                      setQuery('')
+                      searchRef.current?.focus()
+                    }}
+                    aria-label="Clear search"
+                  >
+                    <IconX />
+                  </button>
+                )}
+                <kbd className="search-kbd" aria-hidden="true">⌘K</kbd>
+              </div>
               <button
                 type="button"
-                className="search-clear"
-                onClick={() => {
-                  setQuery('')
-                  searchRef.current?.focus()
-                }}
-                aria-label="Clear search"
+                className="btn btn-primary topbar-add"
+                onClick={openAdd}
+                aria-label={config.addLabel}
               >
-                <IconX />
+                <IconPlus />
+                <span className="topbar-add-label">{config.addLabel}</span>
               </button>
-            )}
-            <kbd className="search-kbd" aria-hidden="true">⌘K</kbd>
-          </div>
-          <button
-            type="button"
-            className="btn btn-primary topbar-add"
-            onClick={openAdd}
-            aria-label={config.addLabel}
-          >
-            <IconPlus />
-            <span className="topbar-add-label">{config.addLabel}</span>
-          </button>
+            </>
+          ) : (
+            <div className="topbar-spacer" aria-hidden="true" />
+          )}
           <AppMenu
             onExport={onExport}
             onImport={onImport}
@@ -582,6 +663,14 @@ function Vault() {
           />
         </div>
 
+        {view === 'discover' ? (
+          <Discover
+            mediaMode={mediaMode}
+            importedAnilistIds={importedAnilistIds}
+            onImport={importFromAniList}
+          />
+        ) : (
+        <>
         <section className="list-header glass">
           <div className="list-header-text">
             <span className="list-tag">{listInfo.tag}</span>
@@ -660,16 +749,20 @@ function Vault() {
             ))}
           </section>
         )}
+        </>
+        )}
       </main>
 
-      <button
-        type="button"
-        className="fab"
-        onClick={openAdd}
-        aria-label={config.addLabel}
-      >
-        <IconPlus />
-      </button>
+      {view === 'library' && (
+        <button
+          type="button"
+          className="fab"
+          onClick={openAdd}
+          aria-label={config.addLabel}
+        >
+          <IconPlus />
+        </button>
+      )}
 
       <AnimeModal
         open={modalOpen}
