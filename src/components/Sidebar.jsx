@@ -56,7 +56,7 @@ export default function Sidebar({
     <aside className="sidebar glass" role="navigation" aria-label="Lists navigation">
       <div className="brand">
         <div className="brand-logo" aria-hidden="true">
-          <img src="/logo.png" alt="" width="42" height="42" />
+          <img src="./logo.png" alt="" width="42" height="42" />
         </div>
         <div>
           <div className="brand-title">Oxygen Vault</div>
