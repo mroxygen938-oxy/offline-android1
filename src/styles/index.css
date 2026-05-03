@@ -2946,3 +2946,418 @@ html[data-theme='light'] .btn-ghost:hover {
   transform: translateZ(0);
   will-change: scroll-position;
 }
+
+/* ========== Discover (AniList) ========== */
+.discover {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding-bottom: 32px;
+}
+
+.discover-head {
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  border-radius: 22px;
+}
+
+.discover-head-text {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.discover-pillrow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.discover-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 4px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.discover-tab {
+  appearance: none;
+  -webkit-appearance: none;
+  border: 0;
+  background: transparent;
+  color: var(--fg-2);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 8px 14px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 160ms ease, color 160ms ease;
+}
+
+.discover-tab:hover {
+  color: var(--fg-1);
+}
+
+.discover-tab.active {
+  background: linear-gradient(135deg, rgba(124, 92, 255, 0.7), rgba(63, 188, 255, 0.5));
+  color: #fff;
+  box-shadow: 0 6px 18px rgba(124, 92, 255, 0.32);
+}
+
+.discover-searchbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 16px;
+}
+
+.discover-searchbar svg {
+  flex: 0 0 auto;
+  color: var(--fg-3);
+}
+
+.discover-searchbar input {
+  flex: 1;
+  background: transparent;
+  border: 0;
+  outline: none;
+  color: var(--fg-1);
+  font: inherit;
+  font-size: 15px;
+  min-width: 0;
+}
+
+.discover-searchbar input::placeholder {
+  color: var(--fg-3);
+}
+
+.discover-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 16px;
+}
+
+.discover-card {
+  appearance: none;
+  -webkit-appearance: none;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--fg-1);
+  border-radius: 18px;
+  padding: 0;
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: transform 160ms ease, border-color 160ms ease, background 160ms ease;
+}
+
+.discover-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.discover-card.is-imported {
+  border-color: rgba(96, 220, 140, 0.45);
+}
+
+.discover-cover {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  background: rgba(255, 255, 255, 0.04);
+  overflow: hidden;
+}
+
+.discover-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.discover-imported-pill,
+.discover-score-pill {
+  position: absolute;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  letter-spacing: 0.02em;
+  pointer-events: none;
+}
+
+.discover-imported-pill {
+  top: 8px;
+  left: 8px;
+  background: rgba(40, 80, 50, 0.85);
+  color: #cdf6d8;
+  border: 1px solid rgba(96, 220, 140, 0.55);
+}
+
+.discover-score-pill {
+  top: 8px;
+  right: 8px;
+  background: rgba(0, 0, 0, 0.65);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+.discover-card-body {
+  padding: 10px 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.discover-card-title {
+  font-size: 13.5px;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--fg-1);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.discover-card-meta {
+  font-size: 11.5px;
+  color: var(--fg-3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.discover-empty {
+  padding: 36px 24px;
+  border-radius: 22px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.discover-skel {
+  pointer-events: none;
+}
+.discover-skel .discover-cover {
+  background: linear-gradient(110deg, rgba(255,255,255,0.04) 8%, rgba(255,255,255,0.08) 18%, rgba(255,255,255,0.04) 33%);
+  background-size: 200% 100%;
+  animation: discover-shimmer 1.4s linear infinite;
+}
+.discover-skel-line {
+  height: 10px;
+  border-radius: 6px;
+  background: rgba(255,255,255,0.08);
+  margin-top: 6px;
+}
+.discover-skel-line.short { width: 60%; }
+
+@keyframes discover-shimmer {
+  0% { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
+}
+
+/* Native: kill the shimmer (it forces full repaints of blurred glass). */
+.native .discover-skel .discover-cover {
+  animation: none;
+  background: rgba(255,255,255,0.06);
+}
+
+/* Preview sheet — full-screen modal with a banner + cover + meta. */
+.discover-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+  overflow-y: auto;
+}
+
+.discover-sheet {
+  position: relative;
+  width: 100%;
+  max-width: 760px;
+  max-height: 92vh;
+  border-radius: 22px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.discover-sheet-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 4;
+  background: rgba(0, 0, 0, 0.5) !important;
+  color: #fff;
+}
+
+.discover-sheet-banner {
+  width: 100%;
+  height: 160px;
+  background: rgba(255, 255, 255, 0.04);
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.discover-sheet-banner::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, transparent 30%, rgba(14, 11, 31, 0.95));
+}
+
+.discover-sheet-banner img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.discover-sheet-body {
+  display: flex;
+  gap: 18px;
+  padding: 18px 20px 20px;
+  align-items: flex-start;
+  overflow-y: auto;
+}
+
+.discover-sheet-cover {
+  flex: 0 0 130px;
+  width: 130px;
+  aspect-ratio: 2 / 3;
+  border-radius: 14px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.05);
+  margin-top: -50px;
+  border: 2px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+}
+
+.discover-sheet-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.discover-sheet-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
+.discover-sheet-text h2 {
+  margin: 0;
+  font-size: 20px;
+  line-height: 1.2;
+  color: var(--fg-1);
+  word-wrap: break-word;
+}
+
+.discover-sheet-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--fg-3);
+}
+
+.discover-sheet-meta span {
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.discover-sheet-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.discover-sheet-stats > div {
+  min-width: 70px;
+}
+
+.discover-sheet-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.discover-tag {
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(124, 92, 255, 0.18);
+  color: #d6c8ff;
+  border: 1px solid rgba(124, 92, 255, 0.32);
+}
+
+.discover-sheet-desc {
+  font-size: 13.5px;
+  color: var(--fg-2);
+  line-height: 1.55;
+  margin: 0;
+  max-height: 220px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+}
+
+.discover-sheet-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.discover-sheet-actions .btn { min-height: 38px; }
+
+.topbar-spacer {
+  flex: 1;
+}
+
+@media (max-width: 640px) {
+  .discover-sheet-body {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 14px 16px 18px;
+  }
+  .discover-sheet-cover {
+    margin: -60px auto 0;
+    flex: 0 0 auto;
+  }
+  .discover-sheet-banner { height: 120px; }
+  .discover-grid {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 12px;
+  }
+  .discover-tabs { width: 100%; overflow-x: auto; flex-wrap: nowrap; }
+  .discover-tab { white-space: nowrap; }
+}

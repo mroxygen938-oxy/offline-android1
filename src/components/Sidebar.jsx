@@ -16,6 +16,8 @@ export default function Sidebar({
   allLabel,
   sectionTitle,
   onClose,
+  view,
+  onSelectView,
 }) {
   /* Sliding glass pill that tracks the active nav item. We measure
      the active button's position relative to the .nav container
@@ -25,9 +27,14 @@ export default function Sidebar({
   const itemRefs = useRef(new Map())
   const [pill, setPill] = useState({ top: 0, height: 0, ready: false })
 
+  /* The sliding pill follows whichever nav button is active. When
+     viewing Discover, key off 'discover'; otherwise key off the
+     active list id. */
+  const activeKey = view === 'discover' ? 'discover' : activeList
+
   useLayoutEffect(() => {
     const navEl = navRef.current
-    const btn = itemRefs.current.get(activeList)
+    const btn = itemRefs.current.get(activeKey)
     if (!navEl || !btn) {
       setPill((p) => ({ ...p, ready: false }))
       return
@@ -39,7 +46,7 @@ export default function Sidebar({
       height: btnRect.height,
       ready: true,
     })
-  }, [activeList, lists, mediaMode, totalCount])
+  }, [activeKey, lists, mediaMode, totalCount])
 
   const setItemRef = (key) => (el) => {
     if (el) itemRefs.current.set(key, el)
@@ -114,11 +121,37 @@ export default function Sidebar({
             opacity: pill.ready && pill.height > 0 ? 1 : 0,
           }}
         />
+        <div className="nav-section">Discover</div>
+        <button
+          type="button"
+          ref={setItemRef('discover')}
+          className={`nav-item ${view === 'discover' ? 'active' : ''}`}
+          onClick={() => onSelectView && onSelectView('discover')}
+        >
+          <span className="nav-icon">
+            <svg
+              viewBox="0 0 24 24"
+              width="18"
+              height="18"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <circle cx="12" cy="12" r="9" />
+              <polygon points="15 9 13 13 9 15 11 11" fill="currentColor" stroke="none" />
+            </svg>
+          </span>
+          <span>Discover</span>
+          <span className="nav-count" aria-hidden="true">•</span>
+        </button>
+
         <div className="nav-section">Library</div>
         <button
           type="button"
           ref={setItemRef('all')}
-          className={`nav-item ${activeList === 'all' ? 'active' : ''}`}
+          className={`nav-item ${view !== 'discover' && activeList === 'all' ? 'active' : ''}`}
           onClick={() => onSelect('all')}
         >
           <span className="nav-icon">
@@ -150,7 +183,7 @@ export default function Sidebar({
               key={list.id}
               type="button"
               ref={setItemRef(list.id)}
-              className={`nav-item ${activeList === list.id ? 'active' : ''}`}
+              className={`nav-item ${view !== 'discover' && activeList === list.id ? 'active' : ''}`}
               onClick={() => onSelect(list.id)}
             >
               <span className="nav-icon">
