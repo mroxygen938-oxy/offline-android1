@@ -3232,7 +3232,7 @@ html[data-theme='light'] .btn-ghost:hover {
 
 .discover-sheet-banner {
   width: 100%;
-  height: 160px;
+  height: 130px;
   background: rgba(255, 255, 255, 0.04);
   position: relative;
   flex: 0 0 auto;
@@ -3265,12 +3265,12 @@ html[data-theme='light'] .btn-ghost:hover {
 }
 
 .discover-sheet-cover {
-  flex: 0 0 140px;
-  width: 140px;
+  flex: 0 0 220px;
+  width: 220px;
   aspect-ratio: 2 / 3;
   border-radius: 14px;
   overflow: hidden;
-  background: rgba(255, 255, 255, 0.05);
+  background: #0a0717;
   margin-top: -70px;
   border: 2px solid rgba(255, 255, 255, 0.1);
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
@@ -3282,8 +3282,8 @@ html[data-theme='light'] .btn-ghost:hover {
   width: 100%;
   height: 100%;
   object-fit: contain;
+  object-position: center;
   display: block;
-  background: rgba(0, 0, 0, 0.35);
 }
 
 .discover-sheet-text {
@@ -3372,11 +3372,11 @@ html[data-theme='light'] .btn-ghost:hover {
     padding: 14px 16px 18px;
   }
   .discover-sheet-cover {
-    margin: -80px auto 0;
+    margin: -60px auto 0;
     flex: 0 0 auto;
-    width: 130px;
+    width: 200px;
   }
-  .discover-sheet-banner { height: 120px; }
+  .discover-sheet-banner { height: 100px; }
   .discover-grid {
     grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
     gap: 12px;
