@@ -192,13 +192,14 @@ export async function popularSeasonAniList(mediaMode = 'anime', perPage = 30) {
   const year = now.getFullYear()
 
   if (mediaMode === 'manga') {
+    /* AniList has no concept of a "manga season" — fall back to
+       currently-releasing manga sorted by popularity. */
     const data = await gql(
-      `query ($perPage: Int, $year: Int) {
+      `query ($perPage: Int) {
          Page(page: 1, perPage: $perPage) {
            media(
              type: MANGA,
              status: RELEASING,
-             startDate_greater: $year,
              sort: POPULARITY_DESC,
              isAdult: false
            ) {
@@ -206,7 +207,7 @@ export async function popularSeasonAniList(mediaMode = 'anime', perPage = 30) {
            }
          }
        }`,
-      { perPage, year: year * 10000 }
+      { perPage }
     )
     return (data.Page?.media || []).map(shape)
   }
