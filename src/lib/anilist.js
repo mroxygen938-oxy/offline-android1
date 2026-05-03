@@ -80,7 +80,9 @@ async function gql(query, variables = {}) {
 
 function pickTitle(t) {
   if (!t) return ''
-  return t.userPreferred || t.english || t.romaji || t.native || ''
+  /* Prefer the English title; fall back to romaji (Japanese romanized)
+     only if AniList doesn't have an English title for this entry. */
+  return t.english || t.romaji || t.userPreferred || t.native || ''
 }
 
 function pickStudio(media) {
