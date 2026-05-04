@@ -106,16 +106,42 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
                 "get_custom_emoji_stickers failed for %s: %s", emoji_id, exc
             )
 
+        # Try to send the premium emoji back. Telegram does NOT raise an error
+        # when a non-Premium bot sends a <tg-emoji> tag for an emoji it does
+        # not own — it silently strips the custom_emoji entity and only the
+        # static fallback character goes through. So we have to verify the
+        # returned message still contains the custom_emoji entity ourselves.
+        sent = None
         send_error: str | None = None
         try:
-            await message.reply_html(_build_tg_emoji_html(emoji_id, fallback))
-            send_ok = True
+            sent = await message.reply_html(_build_tg_emoji_html(emoji_id, fallback))
         except TelegramError as exc:
-            send_ok = False
             send_error = str(exc)
-            logger.info("Cannot send custom emoji %s: %s", emoji_id, exc)
+            logger.info("reply_html failed for %s: %s", emoji_id, exc)
 
-        if send_ok:
+        sent_as_premium = False
+        if sent is not None:
+            sent_as_premium = any(
+                ent.type == MessageEntity.CUSTOM_EMOJI
+                and ent.custom_emoji_id == emoji_id
+                for ent in (sent.entities or ())
+            )
+            if not sent_as_premium:
+                # Telegram silently downgraded the message to plain fallback.
+                # Remove that misleading echo so only the Failure reply stays.
+                try:
+                    await sent.delete()
+                except TelegramError as exc:
+                    logger.debug("Could not delete fallback echo: %s", exc)
+                if send_error is None:
+                    send_error = (
+                        "Telegram dropped the custom emoji entity "
+                        "(only the static fallback was delivered). "
+                        "The bot account likely lacks Telegram Premium "
+                        "and does not own this emoji's sticker set."
+                    )
+
+        if sent_as_premium:
             reply_lines = [
                 "Success: the bot supports this premium emoji.",
                 f"emoji_id: <code>{escape(emoji_id)}</code>",
@@ -133,7 +159,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
                 f"emoji_id: <code>{escape(emoji_id)}</code>",
             ]
             if send_error:
-                reply_lines.append(f"error: <code>{escape(send_error)}</code>")
+                reply_lines.append(f"reason: <code>{escape(send_error)}</code>")
 
         await message.reply_html("\n".join(reply_lines))
 

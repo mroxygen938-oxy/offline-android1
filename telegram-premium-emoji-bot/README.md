@@ -11,12 +11,20 @@ A tiny Python Telegram bot that checks whether *it* can re-send the premium
    - Looks the emoji up via `getCustomEmojiStickers`.
    - Tries to send the same emoji back using a `<tg-emoji emoji-id="...">`
      HTML tag.
+   - **Verifies** the message Telegram actually delivered still contains a
+     `custom_emoji` entity with the same id. Telegram does not raise an
+     error when a non-Premium bot tries to send a custom emoji it does not
+     own — it silently strips the `<tg-emoji>` tag and only the static
+     fallback character goes through. The bot detects this and treats it
+     as a failure (and deletes the fallback echo so you don't see a
+     misleading static emoji).
 3. The bot replies once per emoji:
    - `Success: the bot supports this premium emoji.` together with the
-     `emoji_id` (and `set_name` / fallback character when available) if the
-     send worked.
+     `emoji_id` (and `set_name` / fallback character when available) when
+     the animated premium emoji really went through.
    - `Failure: the bot cannot send this premium emoji.` together with the
-     `emoji_id` and the underlying Telegram error otherwise.
+     `emoji_id` and a reason otherwise (either a Telegram error or
+     `Telegram dropped the custom emoji entity ...`).
 
 If your message has no premium emojis the bot sends a short hint instead.
 
