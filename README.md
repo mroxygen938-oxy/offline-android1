@@ -1,8 +1,14 @@
-# Oxygen Vault — Offline (Android)
+# Oxygen Vault — Offline (Android + Windows)
 
-Fully offline, single-device anime + manga tracker for Android. No login,
-no server, no internet required after install. All data lives in the app's
-local storage on the phone.
+Fully offline, single-device anime + manga tracker. No login, no server,
+no internet required after install. All data lives on the device —
+`localStorage` on Android, `%APPDATA%\Oxygen Vault Offline\` on Windows.
+
+Ships as:
+
+- **Android APK** (Capacitor wrapper, bundled assets)
+- **Windows installer `.exe`** (Electron + NSIS)
+- **Windows portable `.exe`** (single-file, no install — runs from USB)
 
 This is a **separate** app from the synced [oxygenvault.online](https://oxygenvault.online)
 website / sideloaded APK. The two do not talk to each other and have
@@ -29,9 +35,11 @@ so they can be installed side-by-side.
 
 ## Stack
 
-- React 19 + Vite
-- Capacitor 8 (Android wrapper, bundled assets — no remote URL load)
-- `@capacitor/filesystem` + `@capacitor/share` for backup export
+- React 19 + Vite (shared UI)
+- Capacitor 8 for Android (bundled assets — no remote URL load)
+- Electron 33 + electron-builder for Windows
+- `@capacitor/filesystem` + `@capacitor/share` for Android backup export
+- Electron `dialog` + `fs` for Windows backup export
 - `localStorage` for the library (JSON, single key per list type)
 
 ## Layout
@@ -52,7 +60,12 @@ src/
     lists.js              # Anime + manga list definitions
     native.js             # Capacitor detection helper
     storage.js            # useLocalStorage hook
-android/                  # Capacitor Android project
+android/                  # Capacitor Android project (APK / AAB)
+windows/                  # Electron wrapper for Windows .exe
+  main.cjs                # Electron main process (window, IPC, dialogs)
+  preload.cjs             # Sandboxed bridge → window.oxygenElectron
+build/
+  icon.png                # App icon (512×512, auto-converted per platform)
 ```
 
 ## Build
@@ -60,7 +73,30 @@ android/                  # Capacitor Android project
 ```bash
 npm install
 npm run build           # web build into dist/
-npx cap sync android    # copy dist/ into android/ + register plugins
+```
+
+### Windows (`.exe`)
+
+```bash
+npm run electron:dev     # run the app locally via Electron (dev mode)
+npm run electron:build   # build signed-style installer + portable .exe
+```
+
+Outputs land in `release/`:
+
+- `OxygenVault-Offline-<ver>-x64.exe` — NSIS installer (double-click → Install → Start Menu + Desktop shortcut)
+- `OxygenVault-Offline-<ver>-portable.exe` — single-file portable (runs from anywhere, including USB sticks)
+
+Data on Windows is stored under `%APPDATA%\Oxygen Vault Offline\` and
+survives upgrades but is cleared if you uninstall via Add/Remove Programs.
+
+Building `.exe` on Linux needs **wine** installed (`apt install wine wine32`).
+
+### Android (`.apk` + `.aab`)
+
+```bash
+npm run build
+npx cap sync android     # copy dist/ into android/ + register plugins
 ```
 
 ### APK + AAB (signed release)

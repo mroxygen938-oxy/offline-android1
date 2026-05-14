@@ -23,9 +23,19 @@ export default function AppMenu({ onExport, onImport, theme, onTheme }) {
     }
   }, [open])
 
+  const hasDesktopBridge =
+    typeof window !== 'undefined' &&
+    Boolean(window.oxygenElectron || window.oxygenNative)
+
   const triggerImport = () => {
     setOpen(false)
-    fileRef.current?.click()
+    if (hasDesktopBridge) {
+      /* Desktop hosts (Electron or WPF/WebView2): skip the hidden
+         <input> and let the host show a real Open dialog. */
+      onImport(null)
+    } else {
+      fileRef.current?.click()
+    }
   }
 
   const onFile = (e) => {

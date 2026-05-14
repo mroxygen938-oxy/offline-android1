@@ -11,6 +11,22 @@ import { isNative } from './native.js'
 
 const BACKUP_VERSION = 1
 
+/* Electron (Windows/macOS/Linux desktop) exposes a small bridge via
+   preload; the renderer is sandboxed so we can't touch the filesystem
+   directly. */
+const isElectron = () =>
+  typeof window !== 'undefined' && Boolean(window.oxygenElectron)
+
+/* Native Windows host (C# WPF + WebView2) exposes the same API under
+   `window.oxygenNative` via a shim injected by the C# side. */
+const isWin32Native = () =>
+  typeof window !== 'undefined' && Boolean(window.oxygenNative)
+
+const desktopBridge = () =>
+  (typeof window === 'undefined'
+    ? null
+    : window.oxygenElectron || window.oxygenNative || null)
+
 function buildPayload({ animes, mangas }) {
   return JSON.stringify(
     {
@@ -37,6 +53,13 @@ function timestampedFilename() {
 export async function exportLibrary({ animes, mangas }) {
   const json = buildPayload({ animes, mangas })
   const filename = timestampedFilename()
+
+  const bridge = desktopBridge()
+  if (bridge) {
+    const res = await bridge.exportBackup(json)
+    if (res?.canceled) return { canceled: true }
+    return { filePath: res?.filePath, filename }
+  }
 
   if (isNative()) {
     /* On Android, write to the app's Documents folder via the
@@ -89,9 +112,7 @@ export async function exportLibrary({ animes, mangas }) {
   return { filename }
 }
 
-export async function importLibrary(file) {
-  if (!file) throw new Error('No file selected')
-  const text = await file.text()
+function parseBackupText(text) {
   let parsed
   try {
     parsed = JSON.parse(text)
@@ -109,3 +130,23 @@ export async function importLibrary(file) {
     mangas: Array.isArray(parsed.mangas) ? parsed.mangas : [],
   }
 }
+
+/* Called with no args on Electron (we open our own dialog); called
+   with a File on the web + Android (the renderer already picked one
+   via <input type=file>). */
+export async function importLibrary(file) {
+  const bridge = desktopBridge()
+  if (bridge && !file) {
+    const res = await bridge.importBackup()
+    if (res?.canceled) return { canceled: true }
+    return parseBackupText(res.content)
+  }
+  if (!file) throw new Error('No file selected')
+  const text = await file.text()
+  return parseBackupText(text)
+}
+
+/* Re-exported for components that need to pick the right import flow
+   (Electron or WPF/WebView2 both skip the hidden <input> and let the
+   host show a real Open dialog). */
+export { isElectron, isWin32Native }
